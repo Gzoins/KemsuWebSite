@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <script>
+  (function() {
+    try {
+      // Применяем тему до загрузки страницы
+      var theme = localStorage.getItem('kemgu_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+      
+      // Добавляем класс, который убирает переходы на время загрузки
+      document.documentElement.classList.add('no-transition');
+      
+      // Убираем класс после загрузки, чтобы вернуть плавность
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          document.documentElement.classList.remove('no-transition');
+        }, 100);
+      });
+    } catch (e) {}
+  })();
+</script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>КемГУ — Преподаватель</title>
+  <link rel="stylesheet" href="front/css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div class="logo">КG</div>
+      <div class="header-title">
+        <h2>КемГУ — Преподаватель</h2>
+        <div class="small" id="teacherName">Загрузка...</div>
+      </div>
+      
+      <div class="right-header-controls">
+        <div class="theme-area">
+          <button id="themeToggle" class="theme-toggle-btn">🎨</button>
+        </div>
+        
+        <div class="profile-trigger-area">
+          <div id="profileTrigger" class="profile-trigger-btn" aria-label="Мой профиль">
+            <div id="profileAvatarMini" class="profile-avatar-mini">
+              <span id="avatarInitials">P</span>
+              <img id="avatarImage" src="" alt="Avatar" style="display:none;" />
+            </div>
+            <span>Профиль</span>
+          </div>
+          
+          <div id="profileMenu" class="kg-profile-menu">
+            <div class="profile-menu-item" onclick="window.location.href='profile.html'">⚙️ Настройки</div>
+            <div class="profile-menu-item profile-menu-logout" onclick="window.handleLogout()">🚪 Выход</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="dashboard">
+    <aside class="sidebar">
+      <div class="brand-block">
+        <div class="logo">КG</div>
+        <h3>Навигация</h3>
+      </div>
+      <nav class="nav">
+        <a href="teacher.html" class="active">📋 Задания</a>
+        <a href="lecture.html">📖 Лекции</a>
+        <a href="assignment.html">✅ Проверка работ</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <div class="card">
+        <h1 class="h1-shimmer">Управление заданиями</h1>
+        <button class="btn" id="createAssignmentBtn">+ Создать задание</button>
+        <div id="assignmentsList" class="grid"></div>
+      </div>
+    </main>
+
+    <aside class="rightbar">
+      <div class="card">
+        <h3>Статистика</h3>
+        <div class="small" id="teacherStats"></div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Create Assignment Modal -->
+  <div id="createAssignmentModal" class="modal-overlay">
+    <div class="modal-content">
+      <button class="modal-close">&times;</button>
+      <h2>Создать задание</h2>
+      <form id="createAssignmentForm">
+        <div class="form-group">
+          <label for="assignmentGroup">Группа</label>
+          <select id="assignmentGroup" required title="Выберите группу" aria-label="Группа для задания">
+            <option value="ПМИ-251">ПМИ-251</option>
+            <option value="ПИ-251">ПИ-251</option>
+            <option value="КБ-251">КБ-251</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="assignmentSubject">Предмет</label>
+          <input id="assignmentSubject" type="text" required title="Название предмета" aria-label="Название предмета" />
+        </div>
+        <div class="form-group">
+          <label for="assignmentTitle">Название</label>
+          <input id="assignmentTitle" type="text" required title="Название задания" aria-label="Название задания" />
+        </div>
+        <div class="form-group">
+          <label for="assignmentDescription">Описание</label>
+          <textarea id="assignmentDescription" required title="Описание задания" aria-label="Описание задания"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="assignmentDeadline">Дедлайн</label>
+          <input id="assignmentDeadline" type="date" required title="Дата дедлайна" aria-label="Дата дедлайна" />
+        </div>
+        <div class="form-group">
+          <label for="assignmentMaxPoints">Максимальный балл</label>
+          <input id="assignmentMaxPoints" type="number" min="1" max="100" required title="Максимальное количество баллов" aria-label="Максимальное количество баллов" />
+        </div>
+        <div class="form-actions">
+          <button class="btn" type="submit">Создать</button>
+          <button type="button" class="btn-ghost modal-close">Отмена</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+ <!-- Footer with Waves -->
+<footer id="site-footer" class="kg-footer" role="contentinfo">
+  <div class="kg-footer-inner">
+    <div class="kg-footer-brand">© КемГУ — Образовательный портал</div>
+  </div>
+
+  <div class="kg-waves" aria-hidden="true">
+    <!-- Используем один реиспользуемый path и несколько <use> с разными смещениями -->
+    <svg class="kg-waves-svg" viewBox="0 24 150 28" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <path id="gentle-wave"
+              d="M-160 44c30 0 58-18 88-18s58 18 88 18 58-18 88-18 58 18 88 18v44h-352z" />
+      </defs>
+
+      <g class="wave-parallax">
+        <use xlink:href="#gentle-wave" class="wave wave1" x="48" y="0" />
+        <use xlink:href="#gentle-wave" class="wave wave2" x="48" y="3" />
+        <use xlink:href="#gentle-wave" class="wave wave3" x="48" y="5" />
+      </g>
+    </svg>
+  </div>
+</footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/teacher.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "groups": ["ПМИ-251", "ПИ-251", "КБ-251"],
+  "students": [],
+  "teacher": { "id": "tch_1", "login": "teacher", "password": "teacher", "name": "Преподаватель" },
+  "lectures": [],
+  "assignments": [],
+  "resources": [],
+  "submissions": []
+}
