@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  const student = session; // сессия — сам объект студента
+  const student = session; 
   
   document.getElementById('studentName').textContent = student.name;
   document.getElementById('userGroup').textContent = student.group;
@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('profileStudentId').textContent = `№ ${String(student.id).padStart(6, '0')}`;
   document.getElementById('profileAvatar').textContent = student.name.split(' ')[0][0];
   
-  // Инициализация мини-аватара
   const profileAvatarMini = document.getElementById('profileAvatarMini');
   if (profileAvatarMini) {
     if (student.photo) {
@@ -38,6 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const assignmentsList = document.getElementById('assignmentsList');
   if (assignmentsList) {
     try {
+      window.kemguLoader.showElement(assignmentsList);
       const db = await window.fetchDB();
       const assignments = (db.assignments || []).filter(a => a.group === student.group);
       const submissions = db.submissions || [];

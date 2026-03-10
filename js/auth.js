@@ -1,6 +1,5 @@
-// auth.js — обновлённый обработчик входа, совместим с fetchDB() и fallback'ами
+// auth.js - Обновленный обработчик входа с поддержкой API
 document.addEventListener('DOMContentLoaded', async () => {
-
   if (typeof commonInit === 'function') commonInit();
 
   const form = document.getElementById('loginForm');
@@ -20,14 +19,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     setTimeout(() => { err.style.display = 'none'; }, 4000);
   }
 
-  // обработчик формы
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const login = (loginInput.value || '').trim();
-    const pass = (passInput.value || '').trim();
+  // Функция для входа через API
+  async function loginWithAPI(credentials) {
+    try {
+      const result = await window.kemguAPI.auth.login(credentials);
+      
+      if (result.token) {
+        window.kemguAPI.setAuthToken(result.token);
+        
+        // Определяем, на какую страницу перенаправить
+        const userRole = result.user.role;
+        let redirectPage = 'index.html';
+        
+        if (userRole === 'teacher') redirectPage = 'teacher.html';
+        else if (userRole === 'student') redirectPage = 'student.html';
+        else if (userRole === 'admin') redirectPage = 'admin.html'; // если будет админка
+        
+        window.location.href = redirectPage;
+      } else {
+        showError('Ошибка авторизации');
+      }
+    } catch (error) {
+      console.error('API Login error:', error);
+      showError(error.message || 'Ошибка входа. Проверьте логин и пароль.');
+    }
+  }
 
-    if (!login || !pass) { showError('Введите логин и пароль'); return; }
-
+  // Функция для входа через локальную базу (для тестовых пользователей)
+  async function loginWithLocalDB(credentials) {
     try {
       let db;
       if (typeof fetchDB === 'function') {
@@ -41,21 +60,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (!db) { showError('База данных не доступна'); return; }
 
-      if (db.teacher && login === db.teacher.login && pass === db.teacher.password) {
+      const { login, password } = credentials;
+
+      // Проверка преподавателя
+      if (db.teacher && login === db.teacher.login && password === db.teacher.password) {
         const user = { ...db.teacher, role: 'teacher' };
         if (typeof setSession === 'function') setSession(user);
         else sessionStorage.setItem('kemgu_session', JSON.stringify(user));
-        // редирект
-        if (typeof goTo === 'function') goTo('teacher.html'); else window.location.href = 'teacher.html';
+        window.location.href = 'teacher.html';
         return;
       }
 
-      const stud = (db.students || []).find(s => s.login === login && s.password === pass);
+      // Проверка студентов
+      const stud = (db.students || []).find(s => s.login === login && s.password === password);
       if (stud) {
         const user = { ...stud, role: 'student' };
         if (typeof setSession === 'function') setSession(user);
         else sessionStorage.setItem('kemgu_session', JSON.stringify(user));
-        if (typeof goTo === 'function') goTo('student.html'); else window.location.href = 'student.html';
+        window.location.href = 'student.html';
         return;
       }
 
@@ -64,8 +86,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.error('Ошибка входа:', errObj);
       showError('Ошибка при попытке входа: ' + (errObj && errObj.message ? errObj.message : String(errObj)));
     }
-  });
+  }
 
-  if (testStudent) testStudent.addEventListener('click', ()=>{ loginInput.value = 'user1'; passInput.value = 'user1'; });
-  if (testTeacher) testTeacher.addEventListener('click', ()=>{ loginInput.value = 'teacher'; passInput.value = 'teacher'; });
+  // Обработчик формы
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const login = (loginInput.value || '').trim();
+    const pass = (passInput.value || '').trim();
+
+    if (!login || !pass) { showError('Введите логин и пароль'); return; }
+
+    // Проверяем, есть ли API
+    if (window.kemguAPI && window.kemguAPI.auth) {
+      // Используем API для реальной аутентификации
+      await loginWithAPI({ email: login, password: pass });
+    } else {
+      // Используем локальную базу для тестовых пользователей
+      await loginWithLocalDB({ login, password });
+    }
+  });
 });

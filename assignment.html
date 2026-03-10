@@ -4,14 +4,11 @@
   <script>
   (function() {
     try {
-      // Применяем тему до загрузки страницы
       var theme = localStorage.getItem('kemgu_theme') || 'light';
       document.documentElement.setAttribute('data-theme', theme);
       
-      // Добавляем класс, который убирает переходы на время загрузки
       document.documentElement.classList.add('no-transition');
       
-      // Убираем класс после загрузки, чтобы вернуть плавность
       window.addEventListener('load', function() {
         setTimeout(function() {
           document.documentElement.classList.remove('no-transition');
@@ -120,6 +117,7 @@
   </div>
 </footer>
 
+  <script src="js/loader.js"></script>
   <script src="js/main.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/assignment.js"></script>

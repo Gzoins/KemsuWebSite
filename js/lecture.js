@@ -1,5 +1,4 @@
 // lecture.js
-// Lectures module
 
 document.addEventListener('DOMContentLoaded', async () => {
   const session = window.getSession();
@@ -15,7 +14,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       const db = await window.fetchDB();
       let lectures = db.lectures || [];
       
-      // Filter by group for students
       if (session.role === 'student') {
         const student = session;
         lectures = lectures.filter(l => l.group === student.group);

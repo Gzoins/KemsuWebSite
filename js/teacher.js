@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  const teacher = session; // сессия — сам объект учителя
+  const teacher = session; // сессия передать в будующем в моно скриптт
   
   document.getElementById('teacherName').textContent = teacher.name;
   document.getElementById('teacherStats').innerHTML = `
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     <div><b>Логин:</b> ${teacher.login}</div>
   `;
   
-  // Инициализация мини-аватара
+ //аватар для профиля препода
   const profileAvatarMini = document.getElementById('profileAvatarMini');
   if (profileAvatarMini) {
     if (teacher.photo) {

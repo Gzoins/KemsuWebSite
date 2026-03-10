@@ -1,5 +1,4 @@
 // main.js
-// Core Logic with Advanced DB Structure
 
 const DB_KEY = 'kemgu_db';
 const SESSION_KEY = 'kemgu_session';
@@ -8,18 +7,15 @@ const THEME_KEY = 'kemgu_theme';
 const USE_SERVER = true;
 const API_BASE = 'http://localhost:4000';
 
-// === Utilities ===
 function uid(prefix = 'id') { return `${prefix}_${Math.random().toString(36).slice(2, 9)}`; }
 function todayYMD() { return new Date().toISOString().slice(0, 10); }
 function isPast(dateYMD) { if (!dateYMD) return false; return new Date(dateYMD + 'T23:59:59') < new Date(); }
 function safeJSONParse(s, fallback = null) { try { return JSON.parse(s); } catch (e) { return fallback; } }
 function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
 
-// === DB Helpers ===
 function loadDBLocal() { try { return JSON.parse(localStorage.getItem(DB_KEY)); } catch (e) { return null; } }
 function saveDBLocal(db) { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
 
-// === API Helper ===
 async function apiFetch(path, opts = {}) {
   if (!USE_SERVER) throw new Error('Server disabled');
   const url = API_BASE + path;
@@ -37,7 +33,7 @@ async function apiFetch(path, opts = {}) {
   }
 }
 
-// === DB Access ===
+// иницциализация бдшки
 async function fetchDB() {
   if (USE_SERVER) {
     try {
@@ -65,7 +61,6 @@ async function saveDBUnified(db) {
   }
 }
 
-// === Uploads ===
 async function uploadSubmissionFile({ assignmentId, studentLogin, fileInput }) {
   if (!fileInput || !fileInput.files || fileInput.files.length === 0) throw new Error('No file');
   if (USE_SERVER) {
@@ -84,7 +79,6 @@ async function uploadSubmissionFile({ assignmentId, studentLogin, fileInput }) {
       date: new Date().toISOString(), 
       status: 'submitted', points: null, comment: null 
     };
-    // Replace existing submission for this assignment
     const idx = db.submissions.findIndex(s => s.assignmentId === assignmentId && s.studentLogin === studentLogin);
     if (idx >= 0) db.submissions[idx] = { ...db.submissions[idx], ...obj };
     else db.submissions.push(obj);
@@ -93,7 +87,6 @@ async function uploadSubmissionFile({ assignmentId, studentLogin, fileInput }) {
   }
 }
 
-// === Session ===
 function setSession(user) { 
   try { 
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(user)); 
@@ -112,18 +105,14 @@ function clearSession() {
   } catch (e) {} 
 }
 
-// === Logout Handler ===
 window.handleLogout = function() {
   clearSession();
-  // Optional: show logout message
   if (window.showToast) {
     window.showToast('Вы успешно вышли из системы', 'info');
   }
-  // Redirect to login page
   window.location.href = 'index.html';
 };
 
-// === Theme ===
 function initTheme() {
   const t = localStorage.getItem(THEME_KEY) || 'light';
   document.documentElement.setAttribute('data-theme', t);
@@ -134,7 +123,6 @@ function setTheme(name) {
   localStorage.setItem(THEME_KEY, name);
 }
 
-// === Demo Data Init (Advanced Structure) ===
 function initDataLocal() {
   if (loadDBLocal()) return;
   
@@ -162,6 +150,7 @@ function initDataLocal() {
   ];
   
   // Добавим тестовые лекции
+  // а еще не хочу писать свой плеер
   const lectures = [
     {
       id: uid('lec'),
@@ -195,9 +184,8 @@ function initDataLocal() {
   console.log('Demo data initialized');
 }
 
-// === Toast Notification System ===
 function showToast(message, type = 'info', duration = 3000) {
-  // Create toast container if it doesn't exist
+  // контейнер выхода при ошибках
   let container = document.querySelector('.toast-container');
   if (!container) {
     container = document.createElement('div');
@@ -205,11 +193,9 @@ function showToast(message, type = 'info', duration = 3000) {
     document.body.appendChild(container);
   }
   
-  // Create toast element
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
-  
-  // Add icon based on type
+
   let icon = 'ℹ️';
   if (type === 'success') icon = '✅';
   if (type === 'error') icon = '❌';
@@ -222,17 +208,15 @@ function showToast(message, type = 'info', duration = 3000) {
   
   container.appendChild(toast);
   
-  // Trigger animation
   setTimeout(() => toast.classList.add('show'), 10);
   
-  // Remove after duration
   setTimeout(() => {
     toast.classList.remove('show');
     setTimeout(() => toast.remove(), 400);
   }, duration);
 }
 
-// === Check Auth Status ===
+// статус аунтификации слушаем с индекса и передаем на экран 
 function requireAuth(redirectTo = 'index.html') {
   const session = getSession();
   if (!session) {
@@ -241,13 +225,12 @@ function requireAuth(redirectTo = 'index.html') {
   }
   return session;
 }
+// вот так и все, я устал, я спать 
 
-// === Init App ===
 function initApp() {
   try {
     initTheme();
     
-    // Auto-redirect if on login page but already authenticated
     if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
       const session = getSession();
       if (session) {
@@ -260,7 +243,6 @@ function initApp() {
   } catch (e) { console.error('initApp error', e); }
 }
 
-// Exports
 window.fetchDB = fetchDB;
 window.saveDBUnified = saveDBUnified;
 window.uploadSubmissionFile = uploadSubmissionFile;
@@ -277,9 +259,8 @@ window.API_BASE = API_BASE;
 window.showToast = showToast;
 window.requireAuth = requireAuth;
 
-// Add logout to all pages with logout buttons
+// кнопки выхода входа в аккаунт
 document.addEventListener('DOMContentLoaded', () => {
-  // Attach logout handlers to any elements with logout class/button
   const logoutBtns = document.querySelectorAll('.btn-logout, #logoutBtn, [data-action="logout"]');
   logoutBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -290,3 +271,4 @@ document.addEventListener('DOMContentLoaded', () => {
   
   initApp();
 });
+// если бы море было пивом, я бы тоже спать пошел

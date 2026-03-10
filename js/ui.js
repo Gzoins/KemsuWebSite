@@ -1,6 +1,4 @@
 // ui.js
-// Theme Picker, Toast Notifications, Parallax & Profile Menu
-
 function showToast(message, type = 'success') {
   const container = document.querySelector('.toast-container') || createToastContainer();
   
