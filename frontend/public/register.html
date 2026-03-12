@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <script>
+  (function() {
+    try {
+      var theme = localStorage.getItem('kemgu_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+      document.documentElement.classList.add('no-transition');
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          document.documentElement.classList.remove('no-transition');
+        }, 100);
+      });
+    } catch (e) {}
+  })();
+</script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>КемГУ — Регистрация</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div class="logo">КG</div>
+      <div class="header-title">
+        <h2>КемГУ — Регистрация</h2>
+        <div class="small">Создайте аккаунт для доступа к учебным материалам</div>
+      </div>
+      <div class="theme-area">
+        <button id="themeToggle" class="theme-toggle-btn" title="Сменить тему">🎨</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="card login-card">
+      <div class="login-content">
+        <h1 class="h1-shimmer">Создание аккаунта</h1>
+        <p class="small login-subtitle">Заполните форму для регистрации в системе.</p>
+        
+        <form id="registerForm">
+          <div class="form-group">
+            <label for="registerName">ФИО</label>
+            <input id="registerName" type="text" autocomplete="name" placeholder="Введите ваше полное имя" required title="Полное имя студента или преподавателя" aria-label="Введите ваше полное имя" />
+          </div>
+          
+          <div class="form-group">
+            <label for="registerEmail">Email</label>
+            <input id="registerEmail" type="email" autocomplete="email" placeholder="user@kemgu.ru" required title="Email для входа в систему" aria-label="Введите ваш email" />
+          </div>
+          
+          <div class="form-group">
+            <label for="registerRole">Роль</label>
+            <select id="registerRole" required title="Выберите вашу роль в системе" aria-label="Выберите вашу роль">
+              <option value="">Выберите роль</option>
+              <option value="student">Студент</option>
+              <option value="teacher">Преподаватель</option>
+            </select>
+          </div>
+          
+          <div class="form-group" id="groupField" style="display: none;">
+            <label for="registerGroup">Группа</label>
+            <select id="registerGroup" title="Выберите вашу группу" aria-label="Выберите вашу группу">
+              <option value="">Выберите группу</option>
+              <option value="ПМИ-251">ПМИ-251</option>
+              <option value="ПИ-251">ПИ-251</option>
+              <option value="КБ-251">КБ-251</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="registerPassword">Пароль</label>
+            <input id="registerPassword" type="password" autocomplete="new-password" placeholder="••••••••" required title="Пароль для входа" aria-label="Введите пароль" />
+          </div>
+          
+          <div class="form-group">
+            <label for="registerPasswordConfirm">Подтверждение пароля</label>
+            <input id="registerPasswordConfirm" type="password" autocomplete="new-password" placeholder="••••••••" required title="Повторите пароль" aria-label="Подтвердите пароль" />
+          </div>
+          
+          <div class="form-actions">
+            <button class="btn" type="submit">Зарегистрироваться</button>
+            <a href="index.html" class="btn-ghost">← Назад к входу</a>
+          </div>
+          <div id="registerErr" class="error-message"></div>
+        </form>
+      </div>
+      
+      <div class="login-info">
+        <h3 class="info-title">Правила регистрации</h3>
+        <div class="info-block">
+          <div class="small info-label">Для студентов:</div>
+          <code class="info-code">Требуется указать группу</code>
+        </div>
+        <div class="info-block">
+          <div class="small info-label">Для преподавателей:</div>
+          <code class="info-code">Группа не требуется</code>
+        </div>
+        <div class="info-note">
+          <div class="small">💡 После регистрации администратор может изменить вашу роль при необходимости.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer with Waves -->
+  <footer id="site-footer" class="kg-footer" role="contentinfo">
+    <div class="kg-footer-inner">
+      <div class="kg-footer-brand">© КемГУ — Образовательный портал</div>
+    </div>
+
+    <div class="kg-waves" aria-hidden="true">
+      <svg class="kg-waves-svg" viewBox="0 24 150 28" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <path id="gentle-wave"
+                d="M-160 44c30 0 58-18 88-18s58 18 88 18 58-18 88-18 58 18 88 18v44h-352z" />
+        </defs>
+
+        <g class="wave-parallax">
+          <use xlink:href="#gentle-wave" class="wave wave1" x="48" y="0" />
+          <use xlink:href="#gentle-wave" class="wave wave2" x="48" y="3" />
+          <use xlink:href="#gentle-wave" class="wave wave3" x="48" y="5" />
+        </g>
+      </svg>
+    </div>
+  </footer>
+
+  <script src="assets/js/loader.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script defer>
+    console.log('[REGISTER] Inline script loaded');
+    
+    // Ждем полной загрузки всех скриптов
+    function waitForKemguAPI() {
+      return new Promise((resolve) => {
+        if (window.kemguAPI && window.kemguAPI.auth) {
+          resolve();
+        } else {
+          setTimeout(waitForKemguAPI, 50);
+        }
+      });
+    }
+    
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log('[REGISTER] DOMContentLoaded');
+      await waitForKemguAPI();
+      console.log('[REGISTER] window.kemguAPI:', window.kemguAPI);
+      console.log('[REGISTER] window.kemguAPI.auth:', window.kemguAPI?.auth);
+      const form = document.getElementById('registerForm');
+      const roleSelect = document.getElementById('registerRole');
+      const groupField = document.getElementById('groupField');
+      const groupSelect = document.getElementById('registerGroup');
+      const err = document.getElementById('registerErr');
+      
+      console.log('[REGISTER] Elements found:', { form: !!form, roleSelect: !!roleSelect, groupField: !!groupField, groupSelect: !!groupSelect });
+
+      function showError(msg) {
+        err.style.display = 'block';
+        err.textContent = msg;
+        setTimeout(() => { err.style.display = 'none'; }, 5000);
+      }
+
+      function validatePasswords() {
+        const pass = document.getElementById('registerPassword').value;
+        const confirm = document.getElementById('registerPasswordConfirm').value;
+        
+        if (pass !== confirm) {
+          showError('Пароли не совпадают');
+          return false;
+        }
+        
+        if (pass.length < 6) {
+          showError('Пароль должен быть не менее 6 символов');
+          return false;
+        }
+        
+        return true;
+      }
+
+      roleSelect.addEventListener('change', () => {
+        console.log('[REGISTER] Role changed to:', roleSelect.value);
+        console.log('[REGISTER] groupField element:', groupField);
+        
+        if (roleSelect.value === 'student') {
+          groupField.style.display = 'block';
+          groupSelect.required = true;
+          console.log('[REGISTER] Showing group field');
+        } else {
+          groupField.style.display = 'none';
+          groupSelect.required = false;
+          groupSelect.value = '';
+          console.log('[REGISTER] Hiding group field');
+        }
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        console.log('[REGISTER] Form submitted');
+        console.log('[REGISTER] window.kemguAPI:', window.kemguAPI);
+        console.log('[REGISTER] window.kemguAPI.auth:', window.kemguAPI?.auth);
+        
+        if (!validatePasswords()) return;
+
+        const userData = {
+          name: document.getElementById('registerName').value.trim(),
+          email: document.getElementById('registerEmail').value.trim(),
+          role: roleSelect.value,
+          password: document.getElementById('registerPassword').value,
+          group_name: roleSelect.value === 'student' ? groupSelect.value : null
+        };
+
+        try {
+          if (!window.kemguAPI) {
+            throw new Error('kemguAPI не инициализирован');
+          }
+          if (!window.kemguAPI.auth) {
+            throw new Error('kemguAPI.auth не определен. Проверьте порядок загрузки скриптов.');
+          }
+          
+          console.log('[REGISTER] Calling kemguAPI.auth.register with:', userData);
+          const result = await window.kemguAPI.auth.register(userData);
+          
+          if (result.token) {
+            // Сохраняем email для страницы подтверждения
+            sessionStorage.setItem('kemgu_pending_user', JSON.stringify({
+              email: userData.email,
+              name: userData.name,
+              role: userData.role
+            }));
+            
+            // Перенаправляем на страницу подтверждения email
+            window.location.href = `verify.html?email=${encodeURIComponent(userData.email)}`;
+          } else {
+            showError('Ошибка регистрации');
+          }
+        } catch (error) {
+          console.error('Registration error:', error);
+          showError(error.message || 'Ошибка регистрации. Попробуйте позже.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

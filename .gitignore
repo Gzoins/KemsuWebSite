@@ -1,0 +1,37 @@
+# Зависимости
+node_modules/
+backend/node_modules/
+
+# Переменные окружения
+.env
+backend/.env
+
+# База данных (если не нужна в репозитории)
+*.db
+*.db-shm
+*.db-wal
+
+# Логи
+*.log
+logs/
+
+# Загрузки
+uploads/*
+!uploads/.gitkeep
+
+# Временные файлы
+tmp/
+temp/
+.DS_Store
+Thumbs.db
+
+# IDE настройки
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Тесты
+coverage/
+.nyc_output/

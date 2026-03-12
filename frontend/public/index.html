@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <script>
+  (function() {
+    try {
+      // Применяем тему до загрузки страницы
+      var theme = localStorage.getItem('kemgu_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+      
+      // Добавляем класс, который убирает переходы на время загрузки
+      document.documentElement.classList.add('no-transition');
+      
+      // Убираем класс после загрузки, чтобы вернуть плавность
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          document.documentElement.classList.remove('no-transition');
+        }, 100);
+      });
+    } catch (e) {}
+  })();
+</script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>КемГУ — Вход</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div class="logo">КG</div>
+      <div class="header-title">
+        <h2>КемГУ — Портал обучения</h2>
+        <div class="small">Учебная система нового поколения</div>
+      </div>
+      <div class="theme-area">
+        <button id="themeToggle" class="theme-toggle-btn" title="Сменить тему">🎨</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="card login-card">
+      <div class="login-content">
+        <h1 class="h1-shimmer">Добро пожаловать</h1>
+        <p class="small login-subtitle">Войдите в систему для доступа к учебным материалам и заданиям.</p>
+        
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="login">Логин</label>
+            <input id="login" type="text" autocomplete="username" placeholder="Например: user1" required title="Логин для входа в систему" aria-label="Введите ваш логин" />
+          </div>
+          <div class="form-group">
+            <label for="password">Пароль</label>
+            <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" required title="Пароль для входа" aria-label="Введите ваш пароль" />
+          </div>
+          <div class="form-actions">
+            <button class="btn" type="submit">Войти</button>
+            <a href="register.html" class="btn-ghost">Регистрация</a>
+          </div>
+          <div id="err" class="error-message"></div>
+        </form>
+      </div>
+      
+      <div class="login-info">
+        <h3 class="info-title">Быстрый доступ</h3>
+        <div class="info-block">
+          <div class="small info-label">Преподаватель:</div>
+          <code class="info-code">teacher / teacher</code>
+        </div>
+        <div class="info-block">
+          <div class="small info-label">Студенты:</div>
+          <code class="info-code">user1..60 / user1..60</code>
+        </div>
+        <div class="info-note">
+          <div class="small">💡 Попробуйте сменить тему в правом верхнем углу.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer with Waves -->
+<footer id="site-footer" class="kg-footer" role="contentinfo">
+  <div class="kg-footer-inner">
+    <div class="kg-footer-brand">© КемГУ — Образовательный портал</div>
+  </div>
+
+  <div class="kg-waves" aria-hidden="true">
+    <!-- Используем один реиспользуемый path и несколько <use> с разными смещениями -->
+    <svg class="kg-waves-svg" viewBox="0 24 150 28" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <path id="gentle-wave"
+              d="M-160 44c30 0 58-18 88-18s58 18 88 18 58-18 88-18 58 18 88 18v44h-352z" />
+      </defs>
+
+      <g class="wave-parallax">
+        <use xlink:href="#gentle-wave" class="wave wave1" x="48" y="0" />
+        <use xlink:href="#gentle-wave" class="wave wave2" x="48" y="3" />
+        <use xlink:href="#gentle-wave" class="wave wave3" x="48" y="5" />
+      </g>
+    </svg>
+  </div>
+</footer>
+
+  <script src="assets/js/loader.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
+</body>
+</html>

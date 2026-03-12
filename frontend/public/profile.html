@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <script>
+    (function() {
+      try {
+        var theme = localStorage.getItem('kemgu_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.classList.add('no-transition');
+        window.addEventListener('load', function() {
+          setTimeout(function() {
+            document.documentElement.classList.remove('no-transition');
+          }, 100);
+        });
+      } catch (e) {}
+    })();
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>КемГУ — Настройки профиля</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* Дополнительные стили*/
+    .profile-disabled-input {
+      background: rgba(0,0,0,0.05);
+      cursor: not-allowed;
+    }
+    .profile-disabled-input:disabled {
+      color: var(--text);
+      opacity: 0.8;
+    }
+    .form-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .btn-ghost {
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div class="logo">КG</div>
+      <div class="header-title">
+        <h2>КемГУ — Настройки профиля</h2>
+        <div class="small" id="currentUserName">Загрузка...</div>
+      </div>
+      
+      <div class="right-header-controls">
+        <div class="theme-area">
+          <button id="themeToggle" class="theme-toggle-btn">🎨</button>
+        </div>
+        
+        <div class="profile-trigger-area">
+          <div id="profileTrigger" class="profile-trigger-btn">
+            <div id="profileAvatarMini" class="profile-avatar-mini">
+              <span id="avatarInitials">U</span>
+              <img id="avatarImage" src="" alt="Avatar" />
+            </div>
+            <span>Профиль</span>
+          </div>
+          
+          <div id="profileMenu" class="kg-profile-menu">
+            <div class="profile-menu-item" onclick="window.location.href='profile.html'">⚙️ Настройки</div>
+            <div class="profile-menu-item profile-menu-logout" onclick="window.handleLogout()">🚪 Выход</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-content">
+    <div class="profile-card">
+      <h1 class="h1-shimmer">Личный кабинет</h1>
+      
+      <div class="avatar-upload-container">
+        <div id="avatarPreviewContainer" class="large-avatar-preview">
+          <span id="avatarInitialsLarge">U</span>
+          <img id="avatarImageLarge" src="" alt="Avatar" style="display:none;" />
+        </div>
+        
+        <input type="file" id="profilePhotoInput" accept="image/*" 
+               aria-label="Загрузить фотографию профиля" 
+               title="Выберите файл с изображением" />
+        
+        <label for="profilePhotoInput" id="uploadInstruction" class="upload-instruction-text">
+          Нажмите, чтобы добавить фотографию
+        </label>
+      </div>
+
+      <form id="profileNameForm">
+        <div class="form-group">
+          <label for="profileNameDisplay">ФИО</label>
+          <input type="text" id="profileNameDisplay" required 
+                 placeholder="Введите ваши фамилию, имя, отчество"
+                 title="Ваши фамилия, имя, отчество" />
+        </div>
+        
+        <div class="form-group">
+          <label>Email</label>
+          <input type="text" id="profileLoginDisplay" disabled class="profile-disabled-input"
+                 title="Ваш email в системе (не редактируется)" />
+        </div>
+        
+        <div class="form-group">
+          <label>Группа / Роль</label>
+          <input type="text" id="profileGroupDisplay" disabled class="profile-disabled-input"
+                 title="Ваша группа или роль (не редактируется)" />
+        </div>
+        
+        <div class="form-actions">
+          <button type="submit" class="btn">💾 Сохранить изменения</button>
+          <a href="javascript:history.back()" class="btn-ghost">← Назад</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer id="site-footer" class="kg-footer" role="contentinfo">
+    <div class="kg-footer-inner">
+      <div class="kg-footer-brand">© 2024 КемГУ — Образовательный портал</div>
+      <div class="small">Версия 2.0</div>
+    </div>
+    <div class="kg-waves" aria-hidden="true">
+      <div class="wave-layer wave1"></div>
+      <div class="wave-layer wave2"></div>
+      <div class="wave-layer wave3"></div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const session = window.getSession();
+      if (!session) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const user = session;
+
+      document.getElementById('currentUserName').textContent = user.name || 'Гость';
+      document.getElementById('profileNameDisplay').value = user.name || '';
+      document.getElementById('profileLoginDisplay').value = user.email || '';
+      
+      const groupField = document.getElementById('profileGroupDisplay');
+      if (user.role === 'student') {
+        groupField.value = user.group_name || user.group || '—';
+      } else {
+        groupField.value = 'Преподаватель';
+      }
+
+      function updateAvatar() {
+        const miniInitials = document.getElementById('avatarInitials');
+        const miniImage = document.getElementById('avatarImage');
+        if (user.photo) {
+          miniImage.src = user.photo;
+          miniImage.style.display = 'block';
+          miniInitials.style.display = 'none';
+        } else {
+          const initial = (user.name || user.login).charAt(0).toUpperCase();
+          miniInitials.textContent = initial;
+          miniInitials.style.display = 'flex';
+          miniImage.style.display = 'none';
+        }
+
+        const largeInitials = document.getElementById('avatarInitialsLarge');
+        const largeImage = document.getElementById('avatarImageLarge');
+        if (user.photo) {
+          largeImage.src = user.photo;
+          largeImage.style.display = 'block';
+          largeInitials.style.display = 'none';
+        } else {
+          const initial = (user.name || user.login).charAt(0).toUpperCase();
+          largeInitials.textContent = initial;
+          largeInitials.style.display = 'flex';
+          largeImage.style.display = 'none';
+        }
+      }
+      updateAvatar();
+
+      document.getElementById('profilePhotoInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+          const largeImage = document.getElementById('avatarImageLarge');
+          const largeInitials = document.getElementById('avatarInitialsLarge');
+          largeImage.src = ev.target.result;
+          largeImage.style.display = 'block';
+          largeInitials.style.display = 'none';
+          document.getElementById('uploadInstruction').classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
+      });
+
+      document.getElementById('profileNameForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const newName = document.getElementById('profileNameDisplay').value.trim();
+        if (!newName) {
+          alert('Введите имя');
+          return;
+        }
+
+        user.name = newName;
+
+        const photoFile = document.getElementById('profilePhotoInput').files[0];
+        if (photoFile) {
+          const reader = new FileReader();
+          reader.onload = async function(ev) {
+            user.photo = ev.target.result;
+            await saveProfile();
+          };
+          reader.readAsDataURL(photoFile);
+        } else {
+          await saveProfile();
+        }
+
+        async function saveProfile() {
+          try {
+            const db = await window.fetchDB();
+            
+            if (user.role === 'student') {
+              const idx = db.students.findIndex(s => s.login === user.login);
+              if (idx >= 0) db.students[idx] = { ...db.students[idx], ...user };
+            } else {
+              db.teacher = { ...db.teacher, ...user };
+            }
+
+            await window.saveDBUnified(db);
+            window.setSession(user);
+            
+            updateAvatar();
+            document.getElementById('currentUserName').textContent = user.name;
+            
+            if (window.showToast) window.showToast('Профиль обновлён!', 'success');
+          } catch (err) {
+            console.error('Save error:', err);
+            alert('Ошибка сохранения профиля');
+          }
+        }
+      });
+
+      window.initUI();
+    });
+  </script>
+</body>
+</html>

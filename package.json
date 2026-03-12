@@ -1,0 +1,28 @@
+{
+  "name": "kemgu-web-site",
+  "version": "2.0.0",
+  "description": "КемГУ - Портал обучения (полная версия)",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "cd backend && node server.js",
+    "dev": "cd backend && nodemon server.js",
+    "install:all": "npm install && cd backend && npm install",
+    "migrate": "cd backend && node database/migrate.js"
+  },
+  "keywords": [
+    "education",
+    "portal",
+    "kemgu",
+    "learning"
+  ],
+  "author": "KemGU-demo",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kemgu/kemgu-web-site"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  }
+}
