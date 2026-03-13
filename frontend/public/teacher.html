@@ -68,8 +68,9 @@
       </div>
       <nav class="nav">
         <a href="teacher.html" class="active">📋 Задания</a>
-        <a href="lecture.html">📖 Лекции</a>
-        <a href="assignment.html">✅ Проверка работ</a>
+        <!-- <a href="lecture.html">📖 Лекции</a>
+        <a href="assignment.html">✅ Проверка работ</a> -->
+        <a href="resources.html">📚 Учебные материалы</a>
       </nav>
     </aside>
 
@@ -131,6 +132,49 @@
     </div>
   </div>
 
+  <!-- Edit Assignment Modal -->
+  <div id="editAssignmentModal" class="modal-overlay">
+    <div class="modal-content">
+      <button class="modal-close">&times;</button>
+      <h2>Редактировать задание</h2>
+      <form id="editAssignmentForm">
+        <input type="hidden" id="editAssignmentId" />
+        <div class="form-group">
+          <label for="editAssignmentGroup">Группа</label>
+          <select id="editAssignmentGroup" required title="Выберите группу" aria-label="Группа для задания">
+            <option value="ПМИ-251">ПМИ-251</option>
+            <option value="ПИ-251">ПИ-251</option>
+            <option value="КБ-251">КБ-251</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="editAssignmentSubject">Предмет</label>
+          <input id="editAssignmentSubject" type="text" required title="Название предмета" aria-label="Название предмета" />
+        </div>
+        <div class="form-group">
+          <label for="editAssignmentTitle">Название</label>
+          <input id="editAssignmentTitle" type="text" required title="Название задания" aria-label="Название задания" />
+        </div>
+        <div class="form-group">
+          <label for="editAssignmentDescription">Описание</label>
+          <textarea id="editAssignmentDescription" required title="Описание задания" aria-label="Описание задания"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="editAssignmentDeadline">Дедлайн</label>
+          <input id="editAssignmentDeadline" type="date" required title="Дата дедлайна" aria-label="Дата дедлайна" />
+        </div>
+        <div class="form-group">
+          <label for="editAssignmentMaxPoints">Максимальный балл</label>
+          <input id="editAssignmentMaxPoints" type="number" min="1" max="100" required title="Максимальное количество баллов" aria-label="Максимальное количество баллов" />
+        </div>
+        <div class="form-actions">
+          <button class="btn" type="submit">Сохранить</button>
+          <button type="button" class="btn-ghost modal-close">Отмена</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
  <!-- Footer with Waves -->
 <footer id="site-footer" class="kg-footer" role="contentinfo">
   <div class="kg-footer-inner">
@@ -155,31 +199,10 @@
 </footer>
 
   <script src="assets/js/loader.js"></script>
+  <script src="assets/js/router.js"></script>
   <script src="assets/js/main.js"></script>
   <script src="assets/js/ui.js"></script>
   <script src="assets/js/api.js"></script>
-  <script>
-    // Мгновенная проверка авторизации до загрузки страницы
-    (function() {
-      const token = localStorage.getItem('kemgu_token');
-      if (!token) {
-        console.log('[TEACHER PROTECT] No token, redirecting...');
-        window.location.href = 'index.html';
-      } else {
-        try {
-          const payload = JSON.parse(atob(token.split('.')[1]));
-          console.log('[TEACHER PROTECT] Token decoded:', payload);
-          if (payload.role !== 'teacher') {
-            console.log('[TEACHER PROTECT] Wrong role, redirecting...');
-            window.location.href = 'index.html';
-          }
-        } catch (e) {
-          console.error('[TEACHER PROTECT] Invalid token:', e);
-          window.location.href = 'index.html';
-        }
-      }
-    })();
-  </script>
   <script src="assets/js/teacher.js"></script>
 </body>
 </html>

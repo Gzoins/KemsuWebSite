@@ -9,14 +9,41 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const student = session; 
   
-  document.getElementById('studentName').textContent = student.name;
-  document.getElementById('userGroup').textContent = student.group_name || student.group;
-  document.getElementById('profileFullName').textContent = student.name;
-  document.getElementById('profileName').textContent = student.name;
-  document.getElementById('profileEmail').textContent = student.email || '';
-  document.getElementById('profileGroup').textContent = student.group_name || student.group;
-  document.getElementById('profileStudentId').textContent = `№ ${String(student.id).padStart(6, '0')}`;
-  document.getElementById('profileAvatar').textContent = student.name.split(' ')[0][0];
+  console.log('[STUDENT] Session data:', student);
+  console.log('[STUDENT] Group name from session:', student.group_name);
+  console.log('[STUDENT] Group name buffer:', student.group_name ? new TextEncoder().encode(student.group_name) : 'null');
+  
+  // Safely set text content for elements that might not exist on all pages
+  const safeSetText = (id, text) => {
+    const el = document.getElementById(id);
+    if (el) {
+      // Используем textContent для правильной установки текста
+      console.log(`[STUDENT] Setting ${id} to:`, text);
+      el.textContent = text;
+    }
+  };
+  
+  safeSetText('studentName', student.name);
+  safeSetText('userGroup', student.group_name || student.group);
+  safeSetText('profileFullName', student.name);
+  safeSetText('profileName', student.name);
+  safeSetText('profileEmail', student.email || '');
+  safeSetText('profileGroup', student.group_name || student.group);
+  safeSetText('profileStudentId', `№ ${String(student.id).padStart(6, '0')}`);
+  
+  const avatarEl = document.getElementById('profileAvatar');
+  if (avatarEl) {
+    avatarEl.textContent = student.name.split(' ')[0][0];
+  }
+  
+  const studentInfoEl = document.getElementById('studentInfo');
+  if (studentInfoEl) {
+    studentInfoEl.innerHTML = `
+      <div><b>Имя:</b> ${student.name}</div>
+      <div><b>Группа:</b> ${student.group_name || student.group}</div>
+      <div><b>Email:</b> ${student.email}</div>
+    `;
+  }
   
   const profileAvatarMini = document.getElementById('profileAvatarMini');
   if (profileAvatarMini) {
@@ -27,29 +54,40 @@ document.addEventListener('DOMContentLoaded', async () => {
       profileAvatarMini.textContent = initials;
     }
   }
-  
-  document.getElementById('studentInfo').innerHTML = `
-    <div><b>Имя:</b> ${student.name}</div>
-    <div><b>Группа:</b> ${student.group_name || student.group}</div>
-    <div><b>Email:</b> ${student.email}</div>
-  `;
 
   const assignmentsList = document.getElementById('assignmentsList');
   if (assignmentsList) {
     try {
       window.kemguLoader.showElement(assignmentsList);
-      const db = await window.fetchDB();
-      const assignments = (db.assignments || []).filter(a => a.group === student.group);
-      const submissions = db.submissions || [];
+      
+      // Fetch assignments from API for student's group
+      const assignmentsData = await window.kemguAPI.assignments.getAssignments({
+        group_name: student.group_name || student.group
+      });
+      
+      const assignments = assignmentsData.assignments || [];
+      console.log('[STUDENT] Loaded assignments:', assignments.length);
+      
+      // Fetch submissions for this student
+      const submissionsData = await window.kemguAPI.submissions.getSubmissions({
+        student_id: student.id
+      });
+      const submissions = submissionsData.submissions || [];
+      console.log('[STUDENT] Loaded submissions:', submissions.length);
       
       if (assignments.length === 0) {
         assignmentsList.innerHTML = '<p class="small">Нет доступных заданий</p>';
       } else {
         assignmentsList.innerHTML = assignments.map(a => {
-          const existingSub = submissions.find(s => s.assignmentId === a.id && s.studentLogin === student.email);
+          const existingSub = submissions.find(s => s.assignment_id === a.id);
           const statusBadge = existingSub 
-            ? `<span class="status-badge status-${existingSub.status}">${existingSub.status === 'submitted' ? 'Отправлено' : existingSub.status}</span>` 
+            ? `<span class="status-badge status-${existingSub.status}">${existingSub.status === 'submitted' ? 'Отправлено' : existingSub.status === 'graded' ? 'Оценено' : 'На проверке'}</span>` 
             : '';
+          
+          const deadlineDate = a.deadline ? new Date(a.deadline) : null;
+          const formattedDeadline = deadlineDate 
+            ? deadlineDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
+            : 'Не указан';
           
           return `
           <div class="card">
@@ -57,9 +95,9 @@ document.addEventListener('DOMContentLoaded', async () => {
               <h3>${window.escapeHtml(a.title)}</h3>
               ${statusBadge}
             </div>
-            <p class="small">${window.escapeHtml(a.subject)}</p>
-            <p class="small">Дедлайн: ${a.deadline}</p>
-            <p class="small">Макс. балл: ${a.maxScore || a.maxPoints || 100}</p>
+            <p class="small">${window.escapeHtml(a.description || 'Без описания')}</p>
+            <p class="small">Дедлайн: ${formattedDeadline}</p>
+            <p class="small">Макс. балл: ${a.max_score || 100}</p>
             ${existingSub 
               ? `<button class="btn-ghost" disabled>Работа отправлена</button>` 
               : `<button class="btn" onclick="openSubmitModal('${a.id}')">Отправить работу</button>`
@@ -69,7 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     } catch (error) {
       console.error('Failed to load assignments:', error);
-      assignmentsList.innerHTML = '<p class="error-message">Ошибка загрузки заданий</p>';
+      assignmentsList.innerHTML = '<p class="error-message">Ошибка загрузки заданий: ' + error.message + '</p>';
     }
   }
   

@@ -152,8 +152,8 @@
         <h3>Навигация</h3>
       </div>
       <nav class="nav">
-        <a href="student.html">📚 Лекции</a>
-        <a href="assignment.html">📋 Задания</a>
+        <!-- <a href="student.html">📚 Лекции</a> -->
+        <a href="teacher.html">📋 Задания</a>
         <a href="resources.html" class="active">📖 Учебные материалы</a>
       </nav>
     </aside>
@@ -242,6 +242,7 @@
   </footer>
 
   <script src="assets/js/loader.js"></script>
+  <script src="assets/js/router.js"></script>
   <script src="assets/js/main.js"></script>
   <script src="assets/js/ui.js"></script>
   <script src="assets/js/api.js"></script>
@@ -322,9 +323,9 @@
               </div>
             </div>
             <div class="resource-actions">
-              <a href="/uploads/${resource.file_path}" download="${resource.file_name}" class="btn btn-sm">
+              <button onclick="downloadResource('${resource.id}', '${resource.file_name}')" class="btn btn-sm">
                 📥 Скачать
-              </a>
+              </button>
               ${currentUser && currentUser.role === 'teacher' ? `
                 <button class="btn btn-sm btn-danger" onclick="deleteResource('${resource.id}', '${resource.title}')">
                   🗑️ Удалить
@@ -372,6 +373,10 @@
       const group = document.getElementById('resourceGroup').value;
       const fileInput = document.getElementById('resourceFile');
       
+      console.log('[RESOURCES] Form submitted with:', { title, description, group });
+      console.log('[RESOURCES] File selected:', fileInput.files.length > 0 ? fileInput.files[0].name : 'none');
+      console.log('[RESOURCES] Token exists:', !!localStorage.getItem('kemgu_token'));
+      
       if (!title || !group || !fileInput.files || fileInput.files.length === 0) {
         alert('Пожалуйста, заполните все поля и выберите файл');
         return;
@@ -386,12 +391,15 @@
       formData.append('file', file);
 
       try {
+        console.log('[RESOURCES] Calling createResource API...');
         const result = await window.kemguAPI.createResource(formData);
+        console.log('[RESOURCES] Resource created:', result);
         alert('Учебный материал успешно загружен');
         document.getElementById('resourceForm').reset();
         await loadResources();
       } catch (error) {
-        console.error('Error uploading resource:', error);
+        console.error('[RESOURCES] Error uploading resource:', error);
+        console.error('[RESOURCES] Error details:', error.message, error.stack);
         alert('Ошибка загрузки материала: ' + (error.message || 'Неизвестная ошибка'));
       }
     });
@@ -406,8 +414,45 @@
         alert('Учебный материал успешно удален');
         await loadResources();
       } catch (error) {
-        console.error('Error deleting resource:', error);
+        console.error('[RESOURCES] Error deleting resource:', error);
         alert('Ошибка удаления материала: ' + (error.message || 'Неизвестная ошибка'));
+      }
+    }
+
+    async function downloadResource(resourceId, fileName) {
+      try {
+        console.log('[RESOURCES] Downloading resource:', resourceId, fileName);
+        
+        // Получаем токен
+        const token = localStorage.getItem('kemgu_token');
+        
+        // Создаем запрос с авторизацией
+        const response = await fetch(`${API_BASE}/resources/${resourceId}/download`, {
+          method: 'GET',
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : ''
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        // Получаем blob и скачиваем
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        console.log('[RESOURCES] Download completed successfully');
+      } catch (error) {
+        console.error('[RESOURCES] Download error:', error);
+        alert('Ошибка скачивания: ' + (error.message || 'Неизвестная ошибка'));
       }
     }
   </script>

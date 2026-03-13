@@ -41,17 +41,33 @@ const requireRole = (roles) => {
 
 // Функция для генерации JWT токена
 const generateToken = (user) => {
-    return jwt.sign(
-        { 
-            id: user.id, 
-            email: user.email, 
-            role: user.role,
-            name: user.name,
-            group_name: user.group_name
-        },
+    console.log('[AUTH] generateToken called with user:', JSON.stringify(user, null, 2));
+    
+    if (!user || !user.id) {
+        console.error('[AUTH] Invalid user object:', user);
+        throw new Error('Invalid user object for token generation');
+    }
+    
+    const payload = { 
+        id: user.id, 
+        email: user.email, 
+        role: user.role,
+        name: user.name,
+        group_name: user.group_name
+    };
+    
+    console.log('[AUTH] Token payload:', JSON.stringify(payload, null, 2));
+    
+    const token = jwt.sign(
+        payload,
         JWT_SECRET,
         { expiresIn: JWT_EXPIRES_IN }
     );
+    
+    console.log('[AUTH] Generated token:', token);
+    console.log('[AUTH] Token length:', token.length);
+    
+    return token;
 };
 
 // Функция для хеширования пароля

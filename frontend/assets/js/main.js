@@ -106,11 +106,28 @@ function clearSession() {
 }
 
 window.handleLogout = function() {
+  console.log('[LOGOUT] Logging out...');
+  
+  // Очищаем сессию
   clearSession();
+  
+  // Очищаем токен авторизации если есть API
+  if (window.kemguAPI && window.kemguAPI.clearAuthToken) {
+    window.kemguAPI.clearAuthToken();
+    console.log('[LOGOUT] Auth token cleared');
+  }
+  
+  // Показываем уведомление если есть
   if (window.showToast) {
     window.showToast('Вы успешно вышли из системы', 'info');
+  } else {
+    console.log('[LOGOUT] Logout successful');
   }
-  window.location.href = 'index.html';
+  
+  // Перенаправляем на главную
+  setTimeout(() => {
+    window.location.href = 'index.html';
+  }, 500);
 };
 
 function initTheme() {
@@ -261,10 +278,13 @@ window.requireAuth = requireAuth;
 
 // кнопки выхода входа в аккаунт
 document.addEventListener('DOMContentLoaded', () => {
-  const logoutBtns = document.querySelectorAll('.btn-logout, #logoutBtn, [data-action="logout"]');
+  // Универсальный обработчик выхода - работает на всех страницах
+  const logoutBtns = document.querySelectorAll('.btn-logout, #logoutBtn, [data-action="logout"], .profile-menu-logout, [onclick*="handleLogout"]');
   logoutBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
+      e.stopPropagation();
+      console.log('[MAIN.JS] Logout button clicked:', btn.className || btn.id);
       window.handleLogout();
     });
   });

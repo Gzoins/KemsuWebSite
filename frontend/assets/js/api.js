@@ -231,9 +231,35 @@ const lectureAPI = {
 const assignmentAPI = {
     // Получение списка заданий
     async getAssignments(params = {}) {
+        console.log('[ASSIGNMENT API] getAssignments called with params:', params);
         const url = new URL(`${API_BASE}/assignments`);
-        Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
-        return await apiRequest(url.toString());
+        Object.keys(params).forEach(key => {
+            if (params[key] !== undefined && params[key] !== null) {
+                url.searchParams.append(key, params[key]);
+                console.log('[ASSIGNMENT API] Adding param:', key, '=', params[key]);
+            }
+        });
+        console.log('[ASSIGNMENT API] Final URL:', url.toString());
+        
+        try {
+            // Добавляем timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => {
+                console.error('[ASSIGNMENT API] Request timeout after 10s');
+                controller.abort();
+            }, 10000);
+            
+            const result = await apiRequest(url.toString(), { signal: controller.signal });
+            clearTimeout(timeoutId);
+            console.log('[ASSIGNMENT API] Result received:', result);
+            return result;
+        } catch (error) {
+            console.error('[ASSIGNMENT API] Error fetching assignments:', error);
+            if (error.name === 'AbortError') {
+                throw new Error('Превышено время ожидания ответа от сервера');
+            }
+            throw error;
+        }
     },
 
     // Получение задания по ID
@@ -295,10 +321,20 @@ const resourceAPI = {
             formData.append('file', file);
         }
 
-        return await apiRequest(`${API_BASE}/resources`, {
+        // Получаем токен для заголовка Authorization
+        const token = getAuthToken();
+        
+        return await fetch(`${API_BASE}/resources`, {
             method: 'POST',
-            body: formData,
-            headers: {} // Не устанавливаем Content-Type для FormData
+            headers: {
+                'Authorization': token ? `Bearer ${token}` : ''
+            },
+            body: formData
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
         });
     },
 
@@ -379,12 +415,38 @@ window.kemguAPI = {
     lectures: lectureAPI,
     assignments: assignmentAPI,
     resources: resourceAPI,
+    submissions: submissionAPI,
     getAuthToken,
     setAuthToken,
     clearAuthToken
 };
 console.log('[API] kemguAPI exported:', window.kemguAPI);
 console.log('[API] kemguAPI.auth:', window.kemguAPI.auth);
+
+// Функция для совместимости - получение материалов группы
+window.kemguAPI.getResourcesByGroup = async function(groupName) {
+    console.log('[API] getResourcesByGroup called with:', groupName);
+    const params = groupName ? { group_name: groupName } : {};
+    return await resourceAPI.getResources(params);
+};
+
+// Функции для совместимости - создание и удаление ресурсов
+window.kemguAPI.createResource = async function(formData) {
+    console.log('[API] createResource called with formData');
+    // Извлекаем данные из FormData и передаем в resourceAPI.createResource
+    const file = formData.get('file');
+    const resourceData = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        group_name: formData.get('group_name')
+    };
+    return await resourceAPI.createResource(resourceData, file);
+};
+
+window.kemguAPI.deleteResource = async function(resourceId) {
+    console.log('[API] deleteResource called with id:', resourceId);
+    return await resourceAPI.deleteResource(resourceId);
+};
 
 // Совместимость со старым кодом
 window.fetchDB = async function() {
@@ -445,7 +507,20 @@ window.getSession = function() {
     
     // Декодируем JWT токен для получения данных пользователя
     try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        
+        // Правильное декодирование UTF-8
+        const jsonPayload = decodeURIComponent(
+            atob(base64)
+                .split('')
+                .map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                })
+                .join('')
+        );
+        
+        const payload = JSON.parse(jsonPayload);
         console.log('[getSession] Decoded payload:', payload);
         return {
             id: payload.id,

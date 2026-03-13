@@ -44,80 +44,76 @@ const upload = multer({
 });
 
 // Получение списка сабмитов
-router.get('/', authenticateToken, (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
     const { assignment_id, student_id, page = 1, limit = 10 } = req.query;
     const offset = (page - 1) * limit;
 
-    let query = `
-        SELECT s.*, a.title as assignment_title, u.name as student_name, u.group_name as student_group
-        FROM submissions s
-        JOIN assignments a ON s.assignment_id = a.id
-        JOIN users u ON s.student_id = u.id
-        WHERE 1=1
-    `;
-    let countQuery = `
-        SELECT COUNT(*) as total
-        FROM submissions s
-        JOIN assignments a ON s.assignment_id = a.id
-        JOIN users u ON s.student_id = u.id
-        WHERE 1=1
-    `;
-    const params = [];
+    try {
+        let query = `
+            SELECT s.*, a.title as assignment_title, u.name as student_name, u.group_name as student_group
+            FROM submissions s
+            JOIN assignments a ON s.assignment_id = a.id
+            JOIN users u ON s.student_id = u.id
+            WHERE 1=1
+        `;
+        let countQuery = `
+            SELECT COUNT(*) as total
+            FROM submissions s
+            JOIN assignments a ON s.assignment_id = a.id
+            JOIN users u ON s.student_id = u.id
+            WHERE 1=1
+        `;
+        const params = [];
 
-    // Преподаватель видит только свои задания
-    if (req.user.role === 'teacher') {
-        query += ' AND a.created_by = ?';
-        countQuery += ' AND a.created_by = ?';
-        params.push(req.user.id);
-    }
-
-    // Студент видит только свои сабмиты
-    if (req.user.role === 'student') {
-        query += ' AND s.student_id = ?';
-        countQuery += ' AND s.student_id = ?';
-        params.push(req.user.id);
-    }
-
-    // Фильтрация по заданию
-    if (assignment_id) {
-        query += ' AND s.assignment_id = ?';
-        countQuery += ' AND s.assignment_id = ?';
-        params.push(assignment_id);
-    }
-
-    // Фильтрация по студенту (только для преподавателя и администратора)
-    if (student_id && (req.user.role === 'teacher' || req.user.role === 'admin')) {
-        query += ' AND s.student_id = ?';
-        countQuery += ' AND s.student_id = ?';
-        params.push(student_id);
-    }
-
-    query += ' ORDER BY s.submitted_at DESC LIMIT ? OFFSET ?';
-    params.push(parseInt(limit), parseInt(offset));
-
-    db.all(query, params, (err, submissions) => {
-        if (err) {
-            console.error('Ошибка получения сабмитов:', err);
-            return res.status(500).json({ error: 'Ошибка сервера' });
+        // Преподаватель видит только свои задания
+        if (req.user.role === 'teacher') {
+            query += ' AND a.created_by = ?';
+            countQuery += ' AND a.created_by = ?';
+            params.push(req.user.id);
         }
 
-        db.get(countQuery, params.slice(0, -2), (err, count) => {
-            if (err) {
-                console.error('Ошибка подсчета сабмитов:', err);
-                return res.status(500).json({ error: 'Ошибка сервера' });
-            }
+        // Студент видит только свои сабмиты
+        if (req.user.role === 'student') {
+            query += ' AND s.student_id = ?';
+            countQuery += ' AND s.student_id = ?';
+            params.push(req.user.id);
+        }
 
-            res.json({
-                submissions,
-                pagination: {
-                    page: parseInt(page),
-                    limit: parseInt(limit),
-                    total: count.total,
-                    pages: Math.ceil(count.total / limit)
-                }
-            });
+        // Фильтрация по заданию
+        if (assignment_id) {
+            query += ' AND s.assignment_id = ?';
+            countQuery += ' AND s.assignment_id = ?';
+            params.push(assignment_id);
+        }
+
+        // Фильтрация по студенту (только для преподавателя и администратора)
+        if (student_id && (req.user.role === 'teacher' || req.user.role === 'admin')) {
+            query += ' AND s.student_id = ?';
+            countQuery += ' AND s.student_id = ?';
+            params.push(student_id);
+        }
+
+        query += ' ORDER BY s.submitted_at DESC LIMIT ? OFFSET ?';
+        params.push(parseInt(limit), parseInt(offset));
+
+        const submissions = await db.all(query, params);
+        
+        const countParams = params.slice(0, -2);
+        const count = await db.get(countQuery, countParams);
+
+        res.json({
+            submissions,
+            pagination: {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                total: count.total,
+                pages: Math.ceil(count.total / limit)
+            }
         });
-    });
+    } catch (error) {
+        console.error('Ошибка получения сабмитов:', error);
+        res.status(500).json({ error: 'Ошибка сервера', details: error.message });
+    }
 });
 
 // Получение конкретного сабмита

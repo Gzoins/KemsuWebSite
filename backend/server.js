@@ -23,20 +23,74 @@ app.use(cors());
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb', parameterLimit: 50000 }));
 
+// Устанавливаем кодировку UTF-8 для всех JSON ответов
+app.use((req, res, next) => {
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    next();
+});
+
 // Статическая раздача файлов из папки frontend/public (главная страница)
-app.use(express.static(path.join(__dirname, '..', 'frontend', 'public')));
+app.use(express.static(path.join(__dirname, '..', 'frontend', 'public'), {
+    setHeaders: (res, path) => {
+        // Устанавливаем UTF-8 для HTML файлов
+        if (path.endsWith('.html')) {
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        }
+    }
+}));
+
+// Обработчик ошибок для некорректных URL (должен быть перед статикой)
+app.use((err, req, res, next) => {
+    if (err instanceof URIError) {
+        console.warn('[SERVER] Malformed URI:', req.path);
+        return res.status(400).send('Bad Request');
+    }
+    next(err);
+});
 
 // Статическая раздача ассетов с правильной обработкой MIME типов
 app.use('/assets', express.static(path.join(__dirname, '..', 'frontend', 'assets'), {
     setHeaders: (res, path) => {
         if (path.endsWith('.svg')) {
             res.setHeader('Content-Type', 'image/svg+xml');
+        } else if (path.endsWith('.css')) {
+            res.setHeader('Content-Type', 'text/css; charset=utf-8');
+        } else if (path.endsWith('.js')) {
+            res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+        }
+    },
+    fallthrough: true
+}));
+
+// Статическая раздача файлов из папки uploads с правильными заголовками
+app.use('/uploads', express.static(uploadPath, {
+    setHeaders: (res, path) => {
+        // Устанавливаем правильный Content-Type для разных типов файлов
+        if (path.endsWith('.pdf')) {
+            res.setHeader('Content-Type', 'application/pdf; charset=utf-8');
+            res.setHeader('Content-Disposition', 'attachment');
+        } else if (path.endsWith('.doc')) {
+            res.setHeader('Content-Type', 'application/msword; charset=utf-8');
+        } else if (path.endsWith('.docx')) {
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document; charset=utf-8');
+        } else if (path.endsWith('.xls')) {
+            res.setHeader('Content-Type', 'application/vnd.ms-excel; charset=utf-8');
+        } else if (path.endsWith('.xlsx')) {
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=utf-8');
+        } else if (path.endsWith('.ppt')) {
+            res.setHeader('Content-Type', 'application/vnd.ms-powerpoint; charset=utf-8');
+        } else if (path.endsWith('.pptx')) {
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.presentationml.presentation; charset=utf-8');
+        } else if (path.endsWith('.txt')) {
+            res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        } else if (path.endsWith('.csv')) {
+            res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        } else if (['.jpg', '.jpeg', '.png', '.gif'].includes(path.substring(path.lastIndexOf('.')).toLowerCase())) {
+            res.setHeader('Content-Type', `image/${path.substring(path.lastIndexOf('.') + 1)}`);
         }
     }
 }));
-
-// Статическая раздача файлов из папки uploads
-app.use('/uploads', express.static(uploadPath));
 
 // Подключение маршрутов
 const registerRoutes = require('./routes/register');

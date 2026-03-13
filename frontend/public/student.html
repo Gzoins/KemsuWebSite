@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="ru">
 <head>
   <script>
@@ -145,31 +145,10 @@
 </footer>
 
   <script src="assets/js/loader.js"></script>
+  <script src="assets/js/router.js"></script>
   <script src="assets/js/main.js"></script>
   <script src="assets/js/ui.js"></script>
   <script src="assets/js/api.js"></script>
-  <script>
-    // Мгновенная проверка авторизации до загрузки страницы
-    (function() {
-      const token = localStorage.getItem('kemgu_token');
-      if (!token) {
-        console.log('[STUDENT PROTECT] No token, redirecting...');
-        window.location.href = 'index.html';
-      } else {
-        try {
-          const payload = JSON.parse(atob(token.split('.')[1]));
-          console.log('[STUDENT PROTECT] Token decoded:', payload);
-          if (payload.role !== 'student') {
-            console.log('[STUDENT PROTECT] Wrong role, redirecting...');
-            window.location.href = 'index.html';
-          }
-        } catch (e) {
-          console.error('[STUDENT PROTECT] Invalid token:', e);
-          window.location.href = 'index.html';
-        }
-      }
-    })();
-  </script>
   <script src="assets/js/student.js"></script>
 </body>
 </html>
